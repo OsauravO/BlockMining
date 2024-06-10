@@ -1,5 +1,14 @@
 package main
 
+type BlockHeader struct {
+	Version     uint32
+	PrblockHash string
+	MerkleRoot  string
+	Time        int64
+	Bits        uint32
+	Nonce       uint32
+}
+
 type Input struct {
 	TxID         string   `json:"txid"`
 	Vout         uint32   `json:"vout"`
@@ -25,3 +34,4 @@ type Transaction struct {
 	Vin      []Input   `json:"vin"`
 	Vout     []Prevout `json:"vout"`
 }
+
