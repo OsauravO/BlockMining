@@ -61,11 +61,29 @@ func proofOfWork(blockHeader *BlockHeader) bool {
 }
 
 func serTx(tx *Transaction) []byte {
-	
+	var serlzd []byte
+	serlzd = append(serlzd, u32ToB(tx.Version)...)
+	for _, vin := range tx.Vin {
+		txidBytes, _ := hex.DecodeString(vin.TxID)
+		serlzd = append(serlzd, rb(txidBytes)...)
+		serlzd = append(serlzd, u32ToB(vin.Vout)...)
+		serlzd = append(serlzd, u32ToB(vin.Sequence)...)
+	}
+	for _, vout := range tx.Vout {
+		serlzd = append(serlzd, u64ToB(vout.Value)...)
+		serlzd = append(serlzd, scriptpubkey...)
+	}
+	return serlzd
 }
 
 func srlzBhead(bh *BlockHeader) []byte {
+	var serlzd []byte
+	serlzd = append(serlzd, u32ToB(bh.Version)...)
+	prblockHashbytes, _ := hex.DecodeString(bh.PrblockHash)
+	serlzd = append(serlzd, u32ToB(bh.Bits)...)
+	serlzd = append(serlzd, u32ToB(bh.Nonce)...)
 	
+	return serlzd
 }
 
 func calculateTxID(serializedTx []byte) string {
