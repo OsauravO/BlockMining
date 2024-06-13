@@ -56,6 +56,12 @@ type Transaction struct {
 	Vout     []Prevout `json:"vout"`
 }
 
+type MerkleNode struct {
+	Left  *MerkleNode
+	Data  []byte
+	Right *MerkleNode
+}
+
 func proofOfWork(blockHeader *BlockHeader) bool {
 	
 }
@@ -99,4 +105,20 @@ func doubleHash(data []byte) []byte {
 func sha256h(data []byte) []byte {
 	hash := sha256.Sum256(data)
 	return hash[:]
+}
+
+func merkNode(lnode, rnode *MerkleNode, data []byte) *MerkleNode {
+	var node MerkleNode
+	node.Left, node.Right = lnode, rnode
+	return node
+}
+
+func merkTree(leaves []string) *MerkleNode {
+	var nodes []MerkleNode
+	for _, leaf := range leaves {
+		data, _ := hex.DecodeString(leaf)
+		var node MerkleNode = *merkNode(nil, nil, data)
+		nodes = append(nodes, node)
+	}
+	return &nodes[0]
 }
