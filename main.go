@@ -61,11 +61,26 @@ type MerkleNode struct {
 	Data  []byte
 	Right *MerkleNode
 }
+func rb(data []byte) []byte {
+	for i, j := 0, len(data)-1; i < j; i, j = i+1, j-1 {
+		data[i], data[j] = data[j], data[i]
+	}
+	return data
+}
 
 const target string = "0000ffff00000000000000000000000000000000000000000000000000000000"
 
 func proofOfWork(blockHeader *BlockHeader) bool {
-	
+	targetBytes, _ := hex.DecodeString(target)
+	for blockHeader.Nonce <= 0xffffffff {
+		sh := srlzBhead(blockHeader)
+		hash := rb(doubleHash(sh))
+		if checkByteArray(hash, targetBytes) == -1 {
+			return true
+		}
+		blockHeader.Nonce++
+	}
+	return false
 }
 
 func serTx(tx *Transaction) []byte {
