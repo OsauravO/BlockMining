@@ -62,6 +62,8 @@ type MerkleNode struct {
 	Right *MerkleNode
 }
 
+const target string = "0000ffff00000000000000000000000000000000000000000000000000000000"
+
 func proofOfWork(blockHeader *BlockHeader) bool {
 	
 }
