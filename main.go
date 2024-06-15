@@ -73,6 +73,26 @@ func rb(data []byte) []byte {
 
 const target string = "0000ffff00000000000000000000000000000000000000000000000000000000"
 
+func checkByteArray(a, b []byte) int {
+	mini := len(a)
+	if len(b) < mini {
+		mini = len(b)
+	}
+	for i := 0; i < mini; i++ {
+		if a[i] < b[i] {
+			return -1
+		} else if a[i] > b[i] {
+			return 1
+		}
+	}
+	if len(a) < len(b) {
+		return -1
+	} else if len(a) > len(b) {
+		return 1
+	}
+	return 0
+}
+
 func proofOfWork(blockHeader *BlockHeader) bool {
 	targetBytes, _ := hex.DecodeString(target)
 	for blockHeader.Nonce <= 0xffffffff {
