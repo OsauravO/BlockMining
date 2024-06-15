@@ -39,6 +39,9 @@ type Input struct {
 	Prevout      Prevout  `json:"prevout"`
 	Scriptsig    string   `json:"scriptsig"`
 	ScriptsigAsm string   `json:"scriptsig_asm"`
+	Witness      []string `json:"witness"`
+	IsCoinbase   bool     `json:"is_coinbase"`
+	Sequence     uint32   `json:"sequence"`
 }
 
 type Prevout struct {
