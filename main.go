@@ -171,7 +171,12 @@ func sha256h(data []byte) []byte {
 }
 
 func merkNode(lnode, rnode *MerkleNode, data []byte) *MerkleNode {
-	var node MerkleNode
+	node := &MerkleNode{}
+	if lnode == nil && rnode == nil {
+		node.Data = rb(data)
+	} else {
+		node.Data = doubleHash(append(lnode.Data, rnode.Data...))
+	}
 	node.Left, node.Right = lnode, rnode
 	return node
 }
@@ -182,6 +187,17 @@ func merkTree(leaves []string) *MerkleNode {
 		data, _ := hex.DecodeString(leaf)
 		var node MerkleNode = *merkNode(nil, nil, data)
 		nodes = append(nodes, node)
+	}
+	for len(nodes) > 1 {
+		var newLevel []MerkleNode
+		for i := 0; i < len(nodes); i += 2 {
+			if len(nodes)%2 != 0 {
+				nodes = append(nodes, nodes[len(nodes)-1])
+			}
+			node := *merkNode(&nodes[i], &nodes[i+1], nil)
+			newLevel = append(newLevel, node)
+		}
+		nodes = newLevel
 	}
 	return &nodes[0]
 }
