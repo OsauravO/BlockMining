@@ -129,32 +129,6 @@ func CreateCoinbase(netReward uint64) *Transaction {
 	}
 }
 
-func serTx(tx *Transaction) []byte {
-	var serlzd []byte
-	serlzd = append(serlzd, u32ToB(tx.Version)...)
-	for _, vin := range tx.Vin {
-		txidBytes, _ := hex.DecodeString(vin.TxID)
-		serlzd = append(serlzd, rb(txidBytes)...)
-		serlzd = append(serlzd, u32ToB(vin.Vout)...)
-		serlzd = append(serlzd, u32ToB(vin.Sequence)...)
-	}
-	for _, vout := range tx.Vout {
-		serlzd = append(serlzd, u64ToB(vout.Value)...)
-		serlzd = append(serlzd, scriptpubkey...)
-	}
-	return serlzd
-}
-
-func srlzBhead(bh *BlockHeader) []byte {
-	var serlzd []byte
-	serlzd = append(serlzd, u32ToB(bh.Version)...)
-	prblockHashbytes, _ := hex.DecodeString(bh.PrblockHash)
-	serlzd = append(serlzd, u32ToB(bh.Bits)...)
-	serlzd = append(serlzd, u32ToB(bh.Nonce)...)
-	
-	return serlzd
-}
-
 func calculateTxID(serializedTx []byte) string {
 	hash := doubleHash(serializedTx)
 	reversedHash := rb(hash)
@@ -211,4 +185,42 @@ func witnMerkle() string {
 	witnComm = sha256h(sha256h(witnComm))
 	fmt.Println("Witness Commitment: ", hex.EncodeToString(witnComm))
 	return hex.EncodeToString(witnComm)
+}
+
+func SerializeVarInt(n uint64) []byte {
+	if n < 0xfd {
+		return []byte{byte(n)}
+	} else if n <= 0xffff {
+		return append([]byte{0xfd}, u16ToB(uint16(n))...)
+	} else if n <= 0xffffffff {
+		return append([]byte{0xfe}, u32ToB(uint32(n))...)
+	} else {
+		return append([]byte{0xff}, u64ToB(n)...)
+	}
+}
+
+func serTx(tx *Transaction) []byte {
+	var serlzd []byte
+	serlzd = append(serlzd, u32ToB(tx.Version)...)
+	for _, vin := range tx.Vin {
+		txidBytes, _ := hex.DecodeString(vin.TxID)
+		serlzd = append(serlzd, rb(txidBytes)...)
+		serlzd = append(serlzd, u32ToB(vin.Vout)...)
+		serlzd = append(serlzd, u32ToB(vin.Sequence)...)
+	}
+	for _, vout := range tx.Vout {
+		serlzd = append(serlzd, u64ToB(vout.Value)...)
+		serlzd = append(serlzd, scriptpubkey...)
+	}
+	return serlzd
+}
+
+func srlzBhead(bh *BlockHeader) []byte {
+	var serlzd []byte
+	serlzd = append(serlzd, u32ToB(bh.Version)...)
+	prblockHashbytes, _ := hex.DecodeString(bh.PrblockHash)
+	serlzd = append(serlzd, u32ToB(bh.Bits)...)
+	serlzd = append(serlzd, u32ToB(bh.Nonce)...)
+	
+	return serlzd
 }
