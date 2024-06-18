@@ -201,3 +201,14 @@ func merkTree(leaves []string) *MerkleNode {
 	}
 	return &nodes[0]
 }
+
+func witnMerkle() string {
+	_, _, wTxIDs := Ordering()
+	wTxIDs = append([]string{"0000000000000000000000000000000000000000000000000000000000000000"}, wTxIDs...)
+	merkleRoot := merkTree(wTxIDs)
+	cm_str := hex.EncodeToString(merkleRoot.Data) + "0000000000000000000000000000000000000000000000000000000000000000"
+	witnComm, _ := hex.DecodeString(cm_str)
+	witnComm = sha256h(sha256h(witnComm))
+	fmt.Println("Witness Commitment: ", hex.EncodeToString(witnComm))
+	return hex.EncodeToString(witnComm)
+}
