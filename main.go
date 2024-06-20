@@ -59,6 +59,13 @@ type Transaction struct {
 	Vout     []Prevout `json:"vout"`
 }
 
+type TxInfo struct {
+	TxID   string
+	WTxID  string
+	Fee    uint64
+	Weight uint64
+}
+
 type MerkleNode struct {
 	Left  *MerkleNode
 	Data  []byte
