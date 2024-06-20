@@ -155,6 +155,10 @@ func merkNode(lnode, rnode *MerkleNode, data []byte) *MerkleNode {
 	return node
 }
 
+func Comp(a, b TxInfo) bool {
+	return float64(a.Fee)/float64(a.Weight) > float64(b.Fee)/float64(b.Weight)
+}
+
 func merkTree(leaves []string) *MerkleNode {
 	var nodes []MerkleNode
 	for _, leaf := range leaves {
