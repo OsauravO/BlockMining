@@ -273,3 +273,24 @@ func srlzBhead(bh *BlockHeader) []byte {
 	
 	return serlzd
 }
+
+func SegWitSerialize(tx *Transaction) []byte {
+	var serlzd []byte
+	serlzd = append(serlzd, u32ToB(tx.Version)...)
+	if isSegWitTransaction(tx) {
+		serlzd = append(serlzd, []byte{0x00, 0x01}...)
+	}
+	serlzd = append(serlzd, SerializeVarInt(uint64(len(tx.Vin)))...)
+	for _, vin := range tx.Vin {
+		txidBytes, _ := hex.DecodeString(vin.TxID)
+		serlzd = append(serlzd, rb(txidBytes)...)
+		serlzd = append(serlzd, u32ToB(vin.Vout)...)
+		Scriptsig_bytes, _ := hex.DecodeString(vin.Scriptsig)
+		serlzd = append(serlzd, SerializeVarInt(uint64(len(Scriptsig_bytes)))...)
+		serlzd = append(serlzd, Scriptsig_bytes...)
+		serlzd = append(serlzd, u32ToB(vin.Sequence)...)
+	}
+
+	serlzd = append(serlzd, u32ToB(tx.Locktime)...)
+	return serlzd
+}
