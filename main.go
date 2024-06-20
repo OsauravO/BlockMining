@@ -198,6 +198,31 @@ func witnMerkle() string {
 	return hex.EncodeToString(witnComm)
 }
 
+func Ordering() (uint64, []string, []string) {
+	var allowedTxIDs, notAllowedTxIDs []string
+	Directory := "./mempool"
+	files, _ := os.ReadDir(Directory)
+	var txInfo []TxInfo
+	for _, file := range files {
+		txData, _ := os.ReadFile(Directory + "/" + file.Name())
+		var tx Transaction
+		json.Unmarshal(txData, &tx)
+		var fee uint64
+		for _, vin := range tx.Vin {
+			fee += vin.Prevout.Value
+		}
+		for _, vout := range tx.Vout {
+			fee -= vout.Value
+		}
+		serlzd := serTx(&tx)
+		segserlzd := SegWitSerialize(&tx)
+		txID := rb(doubleHash(serlzd))
+		wtxID := rb(doubleHash(segserlzd))
+		txInfo = append(txInfo, TxInfo{TxID: hex.EncodeToString(txID), WTxID: hex.EncodeToString(wtxID), Fee: fee, Weight: uint64(calWitSize(&tx) + calBaseSize(&tx)*4)})
+	}
+	return reward, allowedTxIDs, notAllowedTxIDs
+}
+
 func SerializeVarInt(n uint64) []byte {
 	if n < 0xfd {
 		return []byte{byte(n)}
