@@ -239,6 +239,15 @@ func SerializeVarInt(n uint64) []byte {
 	}
 }
 
+func isSegWitTransaction(tx *Transaction) bool {
+	for _, vin := range tx.Vin {
+		if len(vin.Witness) > 0 {
+			return true
+		}
+	}
+	return false
+}
+
 func serTx(tx *Transaction) []byte {
 	var serlzd []byte
 	serlzd = append(serlzd, u32ToB(tx.Version)...)
