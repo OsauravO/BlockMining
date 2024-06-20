@@ -223,6 +223,10 @@ func Ordering() (uint64, []string, []string) {
 	return reward, allowedTxIDs, notAllowedTxIDs
 }
 
+func calBaseSize(tx *Transaction) int {
+	return len(serTx(tx))
+}
+
 func SerializeVarInt(n uint64) []byte {
 	if n < 0xfd {
 		return []byte{byte(n)}
