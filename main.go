@@ -78,6 +78,16 @@ type MerkleNode struct {
 	Right *MerkleNode
 }
 
+var blockHeader = BlockHeader{
+	Version:     7,
+	PrblockHash: "0000000000000000000000000000000000000000000000000000000000000000",
+	MerkleRoot:  "",
+	Time:        time.Now().Unix(),
+	Bits:        0x1f00ffff,
+	Nonce:       0,
+}
+
+
 func doubleHash(data []byte) []byte {
 	return sha256h(sha256h(data))
 }
@@ -371,3 +381,15 @@ func mineBlock(header *BlockHeader) bool {
 	return proofOfWork(header)
 }
 
+func main() {
+	networkReward, transactionIDs, _ := Ordering()
+	coinbaseTx := CreateCoinbase(networkReward)
+	serializedCoinbaseTx := serTx(coinbaseTx)
+	coinbaseTxID := calculateTxID(serializedCoinbaseTx)
+	transactionIDs = append([]string{coinbaseTxID}, transactionIDs...)
+	merkleRoot := calculateMerkleRoot(transactionIDs)
+	blockHeader.MerkleRoot = merkleRoot
+	if mineBlock(&blockHeader) {
+		writeBlockData(blockHeader, coinbaseTx, transactionIDs)
+	}
+}
