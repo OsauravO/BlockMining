@@ -302,3 +302,19 @@ func SegWitSerialize(tx *Transaction) []byte {
 	serlzd = append(serlzd, u32ToB(tx.Locktime)...)
 	return serlzd
 }
+
+func mineBlock(header *BlockHeader) bool {
+	return proofOfWork(header)
+}
+
+func writeBlockData(header BlockHeader, coinbaseTx *Transaction, txIDs []string) {
+	outputF, _ := os.Create("output.txt")
+	defer outputF.Close()
+	serializedBlockHeader := srlzBhead(&header)
+	segWitCoinbaseTx := SegWitSerialize(coinbaseTx)
+	outputF.WriteString(hex.EncodeToString(serializedBlockHeader) + "\n")
+	outputF.WriteString(hex.EncodeToString(segWitCoinbaseTx) + "\n")
+	for _, txID := range txIDs {
+		outputF.WriteString(txID + "\n")
+	}
+}
