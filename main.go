@@ -295,16 +295,24 @@ func isSegWitTransaction(tx *Transaction) bool {
 func serTx(tx *Transaction) []byte {
 	var serlzd []byte
 	serlzd = append(serlzd, u32ToB(tx.Version)...)
+	serlzd = append(serlzd, SerializeVarInt(uint64(len(tx.Vin)))...)
 	for _, vin := range tx.Vin {
 		txidBytes, _ := hex.DecodeString(vin.TxID)
 		serlzd = append(serlzd, rb(txidBytes)...)
 		serlzd = append(serlzd, u32ToB(vin.Vout)...)
+		Scriptsig_bytes, _ := hex.DecodeString(vin.Scriptsig)
+		serlzd = append(serlzd, SerializeVarInt(uint64(len(Scriptsig_bytes)))...)
+		serlzd = append(serlzd, Scriptsig_bytes...)
 		serlzd = append(serlzd, u32ToB(vin.Sequence)...)
 	}
+	serlzd = append(serlzd, SerializeVarInt(uint64(len(tx.Vout)))...)
 	for _, vout := range tx.Vout {
 		serlzd = append(serlzd, u64ToB(vout.Value)...)
-		serlzd = append(serlzd, scriptpubkey...)
+		scriptPubKeyBytes, _ := hex.DecodeString(vout.Scriptpubkey)
+		serlzd = append(serlzd, SerializeVarInt(uint64(len(scriptPubKeyBytes)))...)
+		serlzd = append(serlzd, scriptPubKeyBytes...)
 	}
+	serlzd = append(serlzd, u32ToB(tx.Locktime)...)
 	return serlzd
 }
 
