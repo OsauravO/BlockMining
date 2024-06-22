@@ -10,7 +10,7 @@ import (
 	"os"
 	"sort"
 	"time"
-	
+
 )
 func u16ToB(num uint16) []byte {
 	buf := make([]byte, 2)
@@ -250,6 +250,25 @@ func Ordering() (uint64, []string, []string) {
 
 func calBaseSize(tx *Transaction) int {
 	return len(serTx(tx))
+}
+
+func calWitSize(tx *Transaction) int {
+	if !isSegWitTransaction(tx) {
+		return 0
+	}
+	var serlzd []byte
+	if isSegWitTransaction(tx) {
+		serlzd = append(serlzd, []byte{0x00, 0x01}...)
+		for _, vin := range tx.Vin {
+			serlzd = append(serlzd, SerializeVarInt(uint64(len(vin.Witness)))...)
+			for _, witness := range vin.Witness {
+				witnessBytes, _ := hex.DecodeString(witness)
+				serlzd = append(serlzd, SerializeVarInt(uint64(len(witnessBytes)))...)
+				serlzd = append(serlzd, witnessBytes...)
+			}
+		}
+	}
+	return len(serlzd)
 }
 
 func SerializeVarInt(n uint64) []byte {
