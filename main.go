@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 )
 func u16ToB(num uint16) []byte {
 	buf := make([]byte, 2)
@@ -276,9 +277,13 @@ func srlzBhead(bh *BlockHeader) []byte {
 	var serlzd []byte
 	serlzd = append(serlzd, u32ToB(bh.Version)...)
 	prblockHashbytes, _ := hex.DecodeString(bh.PrblockHash)
+	serlzd = append(serlzd, prblockHashbytes...)
+	merkRootB, _ := hex.DecodeString(bh.MerkleRoot)
+	serlzd = append(serlzd, merkRootB...)
+	bh.Time = time.Now().Unix()
+	serlzd = append(serlzd, u32ToB(uint32(bh.Time))...)
 	serlzd = append(serlzd, u32ToB(bh.Bits)...)
 	serlzd = append(serlzd, u32ToB(bh.Nonce)...)
-	
 	return serlzd
 }
 
@@ -307,14 +312,3 @@ func mineBlock(header *BlockHeader) bool {
 	return proofOfWork(header)
 }
 
-func writeBlockData(header BlockHeader, coinbaseTx *Transaction, txIDs []string) {
-	outputF, _ := os.Create("output.txt")
-	defer outputF.Close()
-	serializedBlockHeader := srlzBhead(&header)
-	segWitCoinbaseTx := SegWitSerialize(coinbaseTx)
-	outputF.WriteString(hex.EncodeToString(serializedBlockHeader) + "\n")
-	outputF.WriteString(hex.EncodeToString(segWitCoinbaseTx) + "\n")
-	for _, txID := range txIDs {
-		outputF.WriteString(txID + "\n")
-	}
-}
