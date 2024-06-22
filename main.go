@@ -4,7 +4,9 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"encoding/hex"
-
+	"encoding/json"
+	"fmt"
+	"os"
 )
 func u16ToB(num uint16) []byte {
 	buf := make([]byte, 2)
@@ -71,6 +73,16 @@ type MerkleNode struct {
 	Data  []byte
 	Right *MerkleNode
 }
+
+func doubleHash(data []byte) []byte {
+	return sha256h(sha256h(data))
+}
+
+func sha256h(data []byte) []byte {
+	hash := sha256.Sum256(data)
+	return hash[:]
+}
+
 func rb(data []byte) []byte {
 	for i, j := 0, len(data)-1; i < j; i, j = i+1, j-1 {
 		data[i], data[j] = data[j], data[i]
@@ -142,13 +154,9 @@ func calculateTxID(serializedTx []byte) string {
 	return hex.EncodeToString(reversedHash)
 }
 
-func doubleHash(data []byte) []byte {
-	return sha256h(sha256h(data))
-}
-
-func sha256h(data []byte) []byte {
-	hash := sha256.Sum256(data)
-	return hash[:]
+func calculateMerkleRoot(txIDs []string) string {
+	merkleTree := merkTree(txIDs)
+	return hex.EncodeToString(merkleTree.Data)
 }
 
 func merkNode(lnode, rnode *MerkleNode, data []byte) *MerkleNode {
