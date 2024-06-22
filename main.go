@@ -1,13 +1,16 @@
 package main
 
 import (
+
 	"crypto/sha256"
 	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"os"
+	"sort"
 	"time"
+	
 )
 func u16ToB(num uint16) []byte {
 	buf := make([]byte, 2)
@@ -228,6 +231,19 @@ func Ordering() (uint64, []string, []string) {
 		txID := rb(doubleHash(serlzd))
 		wtxID := rb(doubleHash(segserlzd))
 		txInfo = append(txInfo, TxInfo{TxID: hex.EncodeToString(txID), WTxID: hex.EncodeToString(wtxID), Fee: fee, Weight: uint64(calWitSize(&tx) + calBaseSize(&tx)*4)})
+	}
+	sort.Slice(txInfo, func(i, j int) bool {
+		return Comp(txInfo[i], txInfo[j])
+	})
+	var reward uint64
+	var maxWeight uint64 = 3900000
+	for _, tx := range txInfo {
+		if maxWeight >= tx.Weight {
+			maxWeight -= tx.Weight
+			allowedTxIDs = append(allowedTxIDs, tx.TxID)
+			notAllowedTxIDs = append(notAllowedTxIDs, tx.WTxID)
+			reward += tx.Fee
+		}
 	}
 	return reward, allowedTxIDs, notAllowedTxIDs
 }
